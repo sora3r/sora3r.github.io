@@ -1,0 +1,39 @@
+.media-grid {
+    margin: 2rem 0;
+}
+
+.media-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    margin-bottom: 2rem;
+}
+
+.media-item {
+    flex: 0 0 320px;
+    margin-bottom: 1rem;
+}
+
+.media-item video,
+.media-item img {
+    width: 320px;
+    height: 240px;
+    object-fit: cover;
+    border-radius: 8px;
+    display: block;
+}
+
+.caption {
+    text-align: center;
+    margin-top: 0.5rem;
+    font-size: 0.9em;
+    color: #666;
+}
+
+@media (max-width: 768px) {
+    .media-item {
+        flex: 1 1 100%;
+        max-width: 320px;
+    }
+} 

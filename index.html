@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sora3R: Can Video Diffusion Model Reconstruct 4D Geometry?</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/video-grid.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <main>
+        <header>
+            <h1>Sora3R: Can Video Diffusion Model Reconstruct 4D Geometry?</h1>
+        </header>
+
+        <section class="abstract">
+            <h2>Abstract</h2>
+            <p>Reconstructing dynamic 3D scenes (i.e., <strong>4D geometry</strong>) from monocular video is an important yet challenging problem. Conventional <strong>multiview geometry-based</strong> approaches often struggle with dynamic motion, whereas recent <strong>learning-based methods</strong> either require specialized 4D representation or sophisticated optimization.</p>
+            <p>In this paper, we present <strong>Sora3R</strong>, a novel framework that taps into the <strong>rich spatiotemporal priors</strong> of large-scale video diffusion models to directly infer <strong>4D pointmaps</strong> from casual videos.</p>
+        </section>
+
+        <section class="visualization">
+            <h2>Visualization</h2>
+            <p class="note">Note that our method doesn't output a dynamic or confidence mask by default.
+            For fair comparison, we apply groundtruth background masks on each frame for all methods (Sora3R, DUSt3R, MonST3R), if the dataset provides, to filter out the background regions for all the visualization results.</p>
+            
+            <p class="note">For completeness, <em>MonST3R w dyn seg</em> is the default visualization setting of MonST3R in their source repo, with their confidence-based dynamic segmentation mask, reserving static background regions, instead of per-frame groundtruth background mask.</p>
+            
+            <!-- 1. Three main comparison datasets -->
+            <!-- Sintel Dataset -->
+            <div class="media-grid">
+                <h3>Comparison on Sintel Dataset</h3>
+                <div class="media-row">
+                    <div class="media-item">
+                        <video autoplay loop muted playsinline controls>
+                            <source src="media/sintel_seq_0_sora3r.mov" type="video/mp4">
+                        </video>
+                        <p class="caption">Sora3R (Ours)</p>
+                    </div>
+                    <div class="media-item">
+                        <video autoplay loop muted playsinline controls>
+                            <source src="media/sintel_seq_0_dust3r.mov" type="video/mp4">
+                        </video>
+                        <p class="caption">DUSt3R</p>
+                    </div>
+                    <div class="media-item">
+                        <video autoplay loop muted playsinline controls>
+                            <source src="media/sintel_seq_0_monst3r.mov" type="video/mp4">
+                        </video>
+                        <p class="caption">MonST3R</p>
+                    </div>
+                    <div class="media-item">
+                        <video autoplay loop muted playsinline controls>
+                            <source src="media/sintel_seq_0_monst3r_origin.mov" type="video/mp4">
+                        </video>
+                        <p class="caption">MonST3R w dyn seg</p>
+                    </div>
+                    <div class="media-item">
+                        <video autoplay loop muted playsinline controls>
+                            <source src="media/sintel_web_alley_2_seq_0_dit_fi2.mov" type="video/mp4">
+                        </video>
+                        <p class="caption">source video</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TUM-dynamic Dataset -->
+            <div class="media-grid">
+                <h3>Comparison on TUM-dynamic Dataset</h3>
+                <div class="media-row">
+                    <div class="media-item">
+                        <video autoplay loop muted playsinline controls>
+                            <source src="media/rgbd_dataset_freiburg3_sitting_halfsphere_seq_0_dit_fi2_v2.mov" type="video/mp4">
+                        </video>
+                        <p class="caption">Sora3R (Ours)</p>
+                    </div>
+                    <div class="media-item">
+                        <video autoplay loop muted playsinline controls>
+                            <source src="media/rgbd_dataset_freiburg3_sitting_halfsphere_seq_0_dust3r_fi2_v2.mov" type="video/mp4">
+                        </video>
+                        <p class="caption">DUSt3R</p>
+                    </div>
+                    <div class="media-item">
+                        <video autoplay loop muted playsinline controls>
+                            <source src="media/rgbd_dataset_freiburg3_sitting_halfsphere_seq_0_monst3r_fi2_v2.mov" type="video/mp4">
+                        </video>
+                        <p class="caption">MonST3R</p>
+                    </div>
+                    <div class="media-item">
+                        <video autoplay loop muted playsinline controls>
+                            <source src="media/rgbd_dataset_freiburg3_sitting_halfsphere_seq_0_monst3r_fi2_original.mov" type="video/mp4">
+                        </video>
+                        <p class="caption">MonST3R w dyn seg</p>
+                    </div>
+                    <div class="media-item">
+                        <video autoplay loop muted playsinline controls>
+                            <source src="media/tum_web_rgbd_dataset_freiburg3_sitting_halfsphere_seq_0_dit_fi2.mov" type="video/mp4">
+                        </video>
+                        <p class="caption">source video</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ScanNet Dataset -->
+            <div class="media-grid">
+                <h3>Comparison on ScanNet Dataset</h3>
+                <div class="media-row">
+                    <div class="media-item">
+                        <video autoplay loop muted playsinline controls>
+                            <source src="media/scene0708_00_seq_61_dit_fi1_v2.mov" type="video/mp4">
+                        </video>
+                        <p class="caption">Sora3R (Ours)</p>
+                    </div>
+                    <div class="media-item">
+                        <video autoplay loop muted playsinline controls>
+                            <source src="media/scene0708_00_seq_61_dust3r_fi1_v2.mov" type="video/mp4">
+                        </video>
+                        <p class="caption">DUSt3R</p>
+                    </div>
+                    <div class="media-item">
+                        <video autoplay loop muted playsinline controls>
+                            <source src="media/scene0708_00_seq_61_monst3r_fi1_v2.mov" type="video/mp4">
+                        </video>
+                        <p class="caption">MonST3R</p>
+                    </div>
+                    <div class="media-item">
+                        <video autoplay loop muted playsinline controls>
+                            <source src="media/scene0708_00_seq_61_monst3r_fi1_origin.mov" type="video/mp4">
+                        </video>
+                        <p class="caption">MonST3R w dyn seg</p>
+                    </div>
+                    <div class="media-item">
+                        <video autoplay loop muted playsinline controls>
+                            <source src="media/scannet_web_scene0708_00_seq_61_dit_fi1.mov" type="video/mp4">
+                        </video>
+                        <p class="caption">source video</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Visualization figure -->
+            <figure class="full-width-figure">
+                <img src="vis.png" alt="Visualization of Depth maps and Camera Trajectories compared to Groundtruth">
+                <figcaption>Visualization of Depth maps and Camera Trajectories compared to Groundtruth</figcaption>
+            </figure>
+        </section>
+
+        <!-- 3. Additional Visualization section -->
+        <section class="additional-visualization">
+            <h2>Additional Visualization</h2>
+            <p>Besides the results we present in the test dataset, we also show some additional results on the test set of our training datasets, including unseen objects or indoor / outdoor videos.</p>
+            
+            <p>To align with camera pose visualization, fused 4D pointmaps are obtained by estimating the camera poses and depth maps from raw pointmap prediction first, then re-backprojecting again.</p>
+            
+            <!-- RealEstate10K Dataset (both examples) -->
+            <div class="media-grid">
+                <h3>RealEstate10K Dataset</h3>
+                <!-- First RealEstate example -->
+                <div class="hybrid-row">
+                    <div class="media-item">
+                        <video autoplay loop muted playsinline controls>
+                            <source src="media/video_seq_494467_dit_fi2.mov" type="video/mp4">
+                        </video>
+                        <p class="caption">source video</p>
+                    </div>
+                    <div class="media-item">
+                        <video autoplay loop muted playsinline controls>
+                            <source src="media/d2378a6b023141a5.mov" type="video/mp4">
+                        </video>
+                        <p class="caption">Sora3R (Ours)</p>
+                    </div>
+                    <div class="media-item">
+                        <img src="media/d2378a6b023141a5.png" alt="Fused 4D pointmaps">
+                        <p class="caption">Fused 4D pointmaps</p>
+                    </div>
+                </div>
+                <!-- Second RealEstate example -->
+                <div class="hybrid-row">
+                    <div class="media-item">
+                        <video autoplay loop muted playsinline controls>
+                            <source src="media/video_seq_565106_dit_fi2.mov" type="video/mp4">
+                        </video>
+                        <p class="caption">source video</p>
+                    </div>
+                    <div class="media-item">
+                        <video autoplay loop muted playsinline controls>
+                            <source src="media/ed34bd58ed8751db.mov" type="video/mp4">
+                        </video>
+                        <p class="caption">Sora3R (Ours)</p>
+                    </div>
+                    <div class="media-item">
+                        <img src="media/ed34bd58ed8751db.png" alt="Fused 4D pointmaps">
+                        <p class="caption">Fused 4D pointmaps</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Objaverse Dataset (both examples) -->
+            <div class="media-grid">
+                <h3>Objaverse Dataset</h3>
+                <div class="hybrid-row">
+                    <div class="media-item">
+                        <video autoplay loop muted playsinline controls>
+                            <source src="media/video_seq_187200_dit_fi2.mov" type="video/mp4">
+                        </video>
+                        <p class="caption">source video</p>
+                    </div>
+                    <div class="media-item">
+                        <video autoplay loop muted playsinline controls>
+                            <source src="media/motion_c33bc9a83bd54ee9830bc2f50dc28c76.mov" type="video/mp4">
+                        </video>
+                        <p class="caption">Sora3R (Ours)</p>
+                    </div>
+                    <div class="media-item">
+                        <img src="media/motion_c33bc9a83bd54ee9830bc2f50dc28c76.png" alt="Fused 4D pointmaps">
+                        <p class="caption">Fused 4D pointmaps</p>
+                    </div>
+                </div>
+                <div class="hybrid-row">
+                    <div class="media-item">
+                        <video autoplay loop muted playsinline controls>
+                            <source src="media/video_seq_147789_dit_fi2.mov" type="video/mp4">
+                        </video>
+                        <p class="caption">source video</p>
+                    </div>
+                    <div class="media-item">
+                        <video autoplay loop muted playsinline controls>
+                            <source src="media/static_f4b5e527d478485f975aa9f9193248be.mov" type="video/mp4">
+                        </video>
+                        <p class="caption">Sora3R (Ours)</p>
+                    </div>
+                    <div class="media-item">
+                        <img src="media/static_f4b5e527d478485f975aa9f9193248be.png" alt="Fused 4D pointmaps">
+                        <p class="caption">Fused 4D pointmaps</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TartanAir Dataset (both examples) -->
+            <div class="media-grid">
+                <h3>TartanAir Dataset</h3>
+                <div class="hybrid-row">
+                    <div class="media-item">
+                        <video autoplay loop muted playsinline controls>
+                            <source src="media/video_seq_209804_dit_fi1.mov" type="video/mp4">
+                        </video>
+                        <p class="caption">source video</p>
+                    </div>
+                    <div class="media-item">
+                        <video autoplay loop muted playsinline controls>
+                            <source src="media/hospital_Hard_P049.mov" type="video/mp4">
+                        </video>
+                        <p class="caption">Sora3R (Ours)</p>
+                    </div>
+                    <div class="media-item">
+                        <img src="media/hospital_Hard_P049.png" alt="Fused 4D pointmaps">
+                        <p class="caption">Fused 4D pointmaps</p>
+                    </div>
+                </div>
+                <div class="hybrid-row">
+                    <div class="media-item">
+                        <video autoplay loop muted playsinline controls>
+                            <source src="media/video_seq_258221_dit_fi1.mov" type="video/mp4">
+                        </video>
+                        <p class="caption">source video</p>
+                    </div>
+                    <div class="media-item">
+                        <video autoplay loop muted playsinline controls>
+                            <source src="media/oldtown_Easy_P007.mov" type="video/mp4">
+                        </video>
+                        <p class="caption">Sora3R (Ours)</p>
+                    </div>
+                    <div class="media-item">
+                        <img src="media/oldtown_Easy_P007.png" alt="Fused 4D pointmaps">
+                        <p class="caption">Fused 4D pointmaps</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dynamic Replica Dataset (both examples) -->
+            <div class="media-grid">
+                <h3>Dynamic Replica Dataset</h3>
+                <div class="hybrid-row">
+                    <div class="media-item">
+                        <video autoplay loop muted playsinline controls>
+                            <source src="media/video_seq_11368_dit_fi2.mov" type="video/mp4">
+                        </video>
+                        <p class="caption">source video</p>
+                    </div>
+                    <div class="media-item">
+                        <video autoplay loop muted playsinline controls>
+                            <source src="media/e09bca-3_obj_v2.mov" type="video/mp4">
+                        </video>
+                        <p class="caption">Sora3R (Ours)</p>
+                    </div>
+                    <div class="media-item">
+                        <img src="media/e09bca-3_obj.png" alt="Fused 4D pointmaps">
+                        <p class="caption">Fused 4D pointmaps</p>
+                    </div>
+                </div>
+                <div class="hybrid-row">
+                    <div class="media-item">
+                        <video autoplay loop muted playsinline controls>
+                            <source src="media/video_seq_9474_dit_fi2.mov" type="video/mp4">
+                        </video>
+                        <p class="caption">source video</p>
+                    </div>
+                    <div class="media-item">
+                        <video autoplay loop muted playsinline controls>
+                            <source src="media/26b966-3_obj.mov" type="video/mp4">
+                        </video>
+                        <p class="caption">Sora3R (Ours)</p>
+                    </div>
+                    <div class="media-item">
+                        <img src="media/26b966-3_obj.png" alt="Fused 4D pointmaps">
+                        <p class="caption">Fused 4D pointmaps</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Point Odyssey Dataset (both examples) -->
+            <div class="media-grid">
+                <h3>Point Odyssey Dataset</h3>
+                <div class="hybrid-row">
+                    <div class="media-item">
+                        <video autoplay loop muted playsinline controls>
+                            <source src="media/video_seq_14139_dit_fi2.mov" type="video/mp4">
+                        </video>
+                        <p class="caption">source video</p>
+                    </div>
+                    <div class="media-item">
+                        <video autoplay loop muted playsinline controls>
+                            <source src="media/ani14_new_.mov" type="video/mp4">
+                        </video>
+                        <p class="caption">Sora3R (Ours)</p>
+                    </div>
+                    <div class="media-item">
+                        <img src="media/ani14_new_.png" alt="Fused 4D pointmaps">
+                        <p class="caption">Fused 4D pointmaps</p>
+                    </div>
+                </div>
+                <div class="hybrid-row">
+                    <div class="media-item">
+                        <video autoplay loop muted playsinline controls>
+                            <source src="media/video_seq_4713_dit_fi2.mov" type="video/mp4">
+                        </video>
+                        <p class="caption">source video</p>
+                    </div>
+                    <div class="media-item">
+                        <video autoplay loop muted playsinline controls>
+                            <source src="media/cab_e_3rd.mov" type="video/mp4">
+                        </video>
+                        <p class="caption">Sora3R (Ours)</p>
+                    </div>
+                    <div class="media-item">
+                        <img src="media/cab_e_3rd.png" alt="Fused 4D pointmaps">
+                        <p class="caption">Fused 4D pointmaps</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="js/main.js"></script>
+</body>
+</html> 
